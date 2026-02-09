@@ -1,0 +1,7 @@
+__pycache__/
+results/
+datasets/ABDOMINAL/raw/
+datasets/ABDOMINAL/preprocessed/
+datasets/ABDOMINAL/preprocessed_new/
+datasets/ABDOMINAL/visualization/
+datasets/ABDOMINAL/visualization_new/
