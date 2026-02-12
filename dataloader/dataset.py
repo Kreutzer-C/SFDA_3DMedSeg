@@ -127,7 +127,7 @@ class PatchDataset3D(Dataset):
         self,
         data_dir,
         patch_size=(96, 96, 96),
-        patches_per_volume=4,
+        target_coverage=5.0,
         split='train',
         transform=None,
         domain=None,
@@ -138,7 +138,7 @@ class PatchDataset3D(Dataset):
         Args:
             data_dir: path to preprocessed data directory
             patch_size: size of patches to extract (D, H, W)
-            patches_per_volume: number of patches to extract per volume
+            target_coverage: percentage of volume to cover with patches
             split: 'train', 'val', or 'test'
             transform: data transforms to apply
             domain: specific domain to load
@@ -147,7 +147,7 @@ class PatchDataset3D(Dataset):
         """
         self.data_dir = data_dir
         self.patch_size = patch_size if isinstance(patch_size, tuple) else (patch_size,) * 3
-        self.patches_per_volume = patches_per_volume
+        self.target_coverage = target_coverage
         self.split = split
         self.transform = transform
         self.domain = domain
@@ -187,9 +187,19 @@ class PatchDataset3D(Dataset):
         
         return sorted(files)
     
+    def _adaptive_patch_config(self, volume_size, target_coverage=5.0):
+        volume_voxels = volume_size[0] * volume_size[1] * volume_size[2]
+        patch_voxels = self.patch_size[0] * self.patch_size[1] * self.patch_size[2]
+
+        required_patches = int((volume_voxels * target_coverage) / patch_voxels)
+        patches_per_volume = min(required_patches, 500)
+
+        return patches_per_volume
+    
     def _precompute_patch_locations(self):
         """Pre-compute valid patch locations for each volume."""
         self.patch_locations = []
+        self.patches_per_volume = []
         
         for file_path in self.data_files:
             data = np.load(file_path)
@@ -198,15 +208,19 @@ class PatchDataset3D(Dataset):
 
             for i in range(3):
                 if self.patch_size[i] > shape[i]:
-                    print(f"Warning: patch_size[{i}]={self.patch_size[i]} > volume_size[{i}]={shape[i]} for case {file_path}")
+                    print(f"Warning: patch_size={self.patch_size} > volume_size={shape} for case {file_path}")
             
             # Get foreground locations
             foreground_mask = label > 0
             foreground_coords = np.argwhere(foreground_mask)
+
+            # Get adaptive patch configuration
+            patches_this_volume = self._adaptive_patch_config(shape, self.target_coverage)
+            self.patches_per_volume.append(patches_this_volume)
             
             volume_patches = []
             
-            for _ in range(self.patches_per_volume):
+            for _ in range(patches_this_volume):
                 if len(foreground_coords) > 0 and np.random.random() < self.foreground_ratio:
                     # Sample patch centered on foreground
                     idx = np.random.randint(len(foreground_coords))
@@ -234,11 +248,11 @@ class PatchDataset3D(Dataset):
             self.patch_locations.append(volume_patches)
     
     def __len__(self):
-        return len(self.data_files) * self.patches_per_volume
+        return sum(self.patches_per_volume)
     
     def __getitem__(self, idx):
-        volume_idx = idx // self.patches_per_volume
-        patch_idx = idx % self.patches_per_volume
+        volume_idx = np.argmax(np.cumsum(self.patches_per_volume) > idx)
+        patch_idx = idx - np.sum(self.patches_per_volume[:volume_idx])
         
         # Load volume
         data = np.load(self.data_files[volume_idx])

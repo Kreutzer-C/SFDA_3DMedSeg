@@ -55,7 +55,7 @@ def parse_args():
                         help='Number of input channels')
     parser.add_argument('--num_classes', type=int, default=5,
                         help='Number of segmentation classes')
-    parser.add_argument('--f_maps', type=int, nargs='+', default=[64,128,256,512,512],
+    parser.add_argument('--f_maps', type=int, nargs='+', default=[64, 128, 256, 512, 512],
                         help='Feature maps per level')
     parser.add_argument('--num_levels', type=int, default=5,
                         help='Number of levels in U-Net')
@@ -75,8 +75,8 @@ def parse_args():
     # Data loading
     parser.add_argument('--num_workers', type=int, default=4,
                         help='Number of data loading workers')
-    parser.add_argument('--patches_per_volume', type=int, default=4,
-                        help='Number of patches per volume')
+    parser.add_argument('--target_coverage', type=float, default=5.0,
+                        help='Percentage of volume to cover with patches')
     parser.add_argument('--foreground_ratio', type=float, default=0.7,
                         help='Ratio of foreground patches')
     
@@ -213,7 +213,7 @@ def main():
         domain=args.domain,
         metadata_path=paths['metadata_path'],
         use_patch_dataset=True,
-        patches_per_volume=args.patches_per_volume,
+        target_coverage=args.target_coverage,
         foreground_ratio=args.foreground_ratio,
     )
     

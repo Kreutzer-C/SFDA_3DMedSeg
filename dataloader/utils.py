@@ -19,7 +19,7 @@ def get_dataloader(
     domain=None,
     metadata_path=None,
     use_patch_dataset=True,
-    patches_per_volume=4,
+    target_coverage=5.0,
     foreground_ratio=0.5,
     pin_memory=True,
 ):
@@ -35,7 +35,7 @@ def get_dataloader(
         domain: specific domain to load
         metadata_path: path to metadata.json
         use_patch_dataset: whether to use patch-based dataset
-        patches_per_volume: number of patches per volume (for patch dataset)
+        target_coverage: percentage of volume to cover with patches
         foreground_ratio: ratio of foreground patches (for patch dataset)
         pin_memory: whether to pin memory for faster GPU transfer
     
@@ -53,7 +53,7 @@ def get_dataloader(
             dataset = PatchDataset3D(
                 data_dir=data_dir,
                 patch_size=patch_size,
-                patches_per_volume=patches_per_volume,
+                target_coverage=target_coverage,
                 split=split,
                 transform=transform,
                 domain=domain,
