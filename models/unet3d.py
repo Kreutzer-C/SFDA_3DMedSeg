@@ -13,11 +13,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# Default channel configuration aligned with DDFP 2D UNet
-# DDFP 2D structure: inc(64) -> down1(128) -> down2(256) -> down3(512) -> down4(512) (~31M params)
-# For 3D UNet, we scale down to [48, 96, 192, 400, 400] to achieve similar parameter count (~31M)
-# This maintains the same 5-level architecture with comparable capacity
-DDFP_ALIGNED_F_MAPS = [48, 96, 192, 400, 400]
+# Default channel configuration 
+DDFP_ALIGNED_F_MAPS = [64, 128, 256, 512, 512]
 
 
 def number_of_features_per_level(init_channel_number: int, num_levels: int) -> list:
