@@ -251,8 +251,8 @@ class PatchDataset3D(Dataset):
         return sum(self.patches_per_volume)
     
     def __getitem__(self, idx):
-        volume_idx = np.argmax(np.cumsum(self.patches_per_volume) > idx)
-        patch_idx = idx - np.sum(self.patches_per_volume[:volume_idx])
+        volume_idx = int(np.argmax(np.cumsum(self.patches_per_volume) > idx))
+        patch_idx = int(idx - np.sum(self.patches_per_volume[:volume_idx]))
         
         # Load volume
         data = np.load(self.data_files[volume_idx])

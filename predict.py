@@ -39,8 +39,8 @@ def parse_args():
     # Paths
     parser.add_argument('--data_dir', type=str, default='./datasets',
                         help='Base directory for datasets')
-    parser.add_argument('--output_dir', type=str, default=None, required=True,
-                        help='Directory to save predictions (default: auto-generated)')
+    parser.add_argument('--output_dir', type=str, required=True,
+                        help='Directory to load checkpoint and save predictions')
     parser.add_argument('--checkpoint_path', '-ckpt', type=str,
                         help='Path to model checkpoint (default best)')
     

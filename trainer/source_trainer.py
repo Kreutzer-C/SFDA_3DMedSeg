@@ -46,6 +46,9 @@ class SourcePretrainTrainer(BaseTrainer):
         # Use Generalized Dice Loss to handle class imbalance
         self.dice_loss = GeneralizedDiceLoss(normalization='softmax')
         self.ce_loss = CrossEntropyLoss()
+
+        print(f"Length of train loader: {len(train_loader)} patches")
+        print(f"Length of test loader: {len(test_loader)} cases")
     
     def compute_loss(self, outputs, labels):
         """
